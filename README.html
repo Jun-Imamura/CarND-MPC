@@ -1176,6 +1176,26 @@ I used several parameters, starting from $N = 25, dt = 0.1$. But the output was 
   <span class="p">}</span>
 </pre></div>
 
+<h4 id="latency-handle">Latency Handle<a class="headerlink" href="#latency-handle" title="Permanent link"></a></h4>
+<p>In the real system, actuator cannot avoid latecy from signal input to its actuation. Thus, the system will do the optimization based on the predicted state vector. In this assignment, latency is assumed to be $dt = 0.1s$. Following code does the optimization based on predicted state.</p>
+<div class="codehilite"><pre><span class="c1">// Predict state after latency</span>
+<span class="c1">// x, y and psi are all zero after transformation above</span>
+<span class="k">const</span> <span class="kt">double</span> <span class="n">Lf</span> <span class="o">=</span> <span class="mf">2.67</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">double</span> <span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
+
+<span class="kt">double</span> <span class="n">pred_px</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">+</span> <span class="n">v</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">epsi</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span><span class="p">;</span> 
+<span class="kt">double</span> <span class="n">pred_py</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">+</span> <span class="n">v</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">epsi</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span> <span class="p">;</span>
+<span class="kt">double</span> <span class="n">pred_psi</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="o">-</span><span class="n">delta</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">Lf</span><span class="p">;</span>
+<span class="kt">double</span> <span class="n">pred_v</span> <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">dt</span><span class="p">;</span>
+<span class="kt">double</span> <span class="n">pred_cte</span> <span class="o">=</span> <span class="n">cte</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">epsi</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span><span class="p">;</span>
+<span class="kt">double</span> <span class="n">pred_epsi</span> <span class="o">=</span> <span class="n">epsi</span> <span class="o">-</span> <span class="n">v</span> <span class="o">*</span> <span class="n">atan</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">Lf</span><span class="p">;</span>
+
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">state</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>
+<span class="n">state</span> <span class="o">&lt;&lt;</span> <span class="n">pred_px</span><span class="p">,</span> <span class="n">pred_py</span><span class="p">,</span> <span class="n">pred_psi</span><span class="p">,</span> <span class="n">pred_v</span><span class="p">,</span> <span class="n">pred_cte</span><span class="p">,</span> <span class="n">pred_epsi</span><span class="p">;</span>
+
+<span class="k">auto</span> <span class="n">vars</span> <span class="o">=</span> <span class="n">mpc</span><span class="p">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">);</span>
+</pre></div>
+
 <h2 id="output-example">Output Example<a class="headerlink" href="#output-example" title="Permanent link"></a></h2>
 <h4 id="capture-image">Capture Image<a class="headerlink" href="#capture-image" title="Permanent link"></a></h4>
 <p><img alt="&quot;image captured&quot;" src="///C://Users/imach/Desktop/Udacity/CarND-MPC/output/capture.png" /></p>

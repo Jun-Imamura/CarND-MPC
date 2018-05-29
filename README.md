@@ -135,6 +135,28 @@ Vehicle cannot change its steering and speed in the road scene.
   }
 ```
 
+#### Latency Handle
+In the real system, actuator cannot avoid latecy from signal input to its actuation. Thus, the system will do the optimization based on the predicted state vector. In this assignment, latency is assumed to be $dt = 0.1s$. Following code does the optimization based on predicted state.
+
+```cpp
+// Predict state after latency
+// x, y and psi are all zero after transformation above
+const double Lf = 2.67;
+const double dt = 0.1;
+
+double pred_px = 0.0 + v*cos(epsi) * dt; 
+double pred_py = 0.0 + v*sin(epsi) * dt ;
+double pred_psi = 0.0 + v * -delta * dt / Lf;
+double pred_v = v + a * dt;
+double pred_cte = cte + v * sin(epsi) * dt;
+double pred_epsi = epsi - v * atan(coeffs[1]) * dt / Lf;
+
+Eigen::VectorXd state(6);
+state << pred_px, pred_py, pred_psi, pred_v, pred_cte, pred_epsi;
+
+auto vars = mpc.Solve(state, coeffs);
+```
+
 ## Output Example
 #### Capture Image
 !["image captured"](./output/capture.png)
